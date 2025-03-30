@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>عقاري AI - تقدير سعر الأرض</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f0f4f8; margin: 0; padding: 0; }
+    .container { max-width: 700px; margin: 3rem auto; background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 6px 15px rgba(0,0,0,0.1); }
+    h1 { text-align: center; color: #2c3e50; margin-bottom: 2rem; }
+    label { font-weight: bold; display: block; margin-top: 1rem; }
+    input, select, button {
+      width: 100%; padding: 0.8rem; margin-top: 0.5rem;
+      border-radius: 8px; border: 1px solid #ccc; font-size: 1rem;
+    }
+    button {
+      background: #2d89ef; color: white; border: none; cursor: pointer; margin-top: 1.5rem;
+    }
+    button:hover { background: #1b61c1; }
+    #result { margin-top: 2rem; font-size: 1.2rem; color: #333; text-align: center; }
+    .metrics-box { background: #e8f0fe; padding: 1rem; margin-top: 2rem; border-radius: 8px; }
+    .accuracy-bar { margin-top: 1rem; background: #ddd; border-radius: 10px; overflow: hidden; height: 20px; }
+    .accuracy-fill { background: #38a169; height: 100%; text-align: center; color: white; font-size: 0.9rem; line-height: 20px; }
+    .upload-box { background: #fefcbf; padding: 1rem; margin-top: 2rem; border-radius: 8px; }
+    .success { color: green; margin-top: 0.5rem; font-weight: bold; }
+    .error { color: red; margin-top: 0.5rem; font-weight: bold; }
+    .log-box { background: #fff; border: 1px solid #ccc; margin-top: 1rem; padding: 0.5rem; border-radius: 6px; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>حاسبة عقاري AI</h1>
+    <form id="predictForm">
+      <label for="city">المدينة</label>
+      <select id="city" name="city" required onchange="updateDistricts()">
+        <option value="">اختر المدينة</option>
+        <option value="الرياض">الرياض</option>
+        <option value="جدة">جدة</option>
+        <option value="مكة">مكة</option>
+        <option value="الدمام">الدمام</option>
+        <option value="المدينة المنورة">المدينة المنورة</option>
+        <option value="الطائف">الطائف</option>
+        <option value="أبها">أبها</option>
+      </select>
+
+      <label for="district">الحي</label>
+      <select id="district" name="district" required></select>
+
+      <label for="type">نوع العقار</label>
+      <select id="type" name="type" required>
+        <option value="سكني">سكني</option>
+        <option value="تجاري">تجاري</option>
+        <option value="زراعي">زراعي</option>
+      </select>
+
+      <label for="size">المساحة (متر مربع)</label>
+      <input type="number" id="size" name="size" required>
+
+      <label for="face">الواجهة</label>
+      <select id="face" name="face" required>
+        <option value="شمال">شمال</option>
+        <option value="جنوب">جنوب</option>
+        <option value="شرق">شرق</option>
+        <option value="غرب">غرب</option>
+      </select>
+
+      <label for="usage">الاستخدام</label>
+      <select id="usage" name="usage" required>
+        <option value="سكني فقط">سكني فقط</option>
+        <option value="تجاري فقط">تجاري فقط</option>
+        <option value="سكني وتجاري">سكني وتجاري</option>
+      </select>
+
+      <button type="submit">احسب السعر</button>
+    </form>
+    <div id="result"></div>
+
+    <div class="metrics-box" id="metrics"></div>
+    <div class="metrics-box">
+      <strong>نسبة الدقة الحالية</strong>
+      <div class="accuracy-bar">
+        <div id="accuracyFill" class="accuracy-fill" style="width: 0%">0%</div>
+      </div>
+    </div>
+
+    <div class="upload-box">
+      <strong>📤 طور النموذج بملف CSV خاص بك:</strong>
+      <input type="file" id="csvFile" accept=".csv">
+      <button onclick="uploadCSV()">رفع وتدريب</button>
+      <p style="font-size: 0.9rem; margin-top: 0.5rem;">📎 أو <a href="/static/example.csv" download>حمّل نموذج CSV جاهز</a></p>
+      <div id="uploadStatus"></div>
+      <div id="uploadLog" class="log-box"></div>
+    </div>
+  </div>
+
+  <script>
+    const cityDistricts = {
+      "الرياض": ["النرجس", "الروابي", "الملز", "العزيزية", "النسيم"],
+      "جدة": ["السلامة", "الفيصلية", "البوادي", "الرويس"],
+      "مكة": ["الشوقية", "العوالي", "العتيبية"],
+      "الدمام": ["الشاطئ", "العدامة", "الجامعيين"],
+      "المدينة المنورة": ["العزيزية", "البركة", "الخالدية"],
+      "الطائف": ["قروى", "الرميدة", "شهار"],
+      "أبها": ["المنسك", "السروات", "المروج"]
+    };
+
+    function updateDistricts() {
+      const city = document.getElementById("city").value;
+      const districtSelect = document.getElementById("district");
+      districtSelect.innerHTML = "<option value=''>اختر الحي</option>";
+      if (cityDistricts[city]) {
+        cityDistricts[city].forEach(d => {
+          const opt = document.createElement("option");
+          opt.value = d;
+          opt.textContent = d;
+          districtSelect.appendChild(opt);
+        });
+      }
+    }
+
+    document.getElementById("predictForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const res = await fetch("/predict", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          "المساحة": parseFloat(document.getElementById("size").value),
+          "النوع": document.getElementById("type").value,
+          "المدينة": document.getElementById("city").value,
+          "الحي": document.getElementById("district").value,
+          "الواجهة": document.getElementById("face").value,
+          "الاستخدام": document.getElementById("usage").value
+        })
+      });
+      const data = await res.json();
+      if (data["السعر المتوقع"]) {
+        document.getElementById("result").innerHTML =
+          `<strong>السعر المتوقع:</strong> ${data["السعر المتوقع"]}<br><strong>الحد الآمن:</strong> ${data["الحد الآمن للمزايدة"]}`;
+      } else {
+        document.getElementById("result").innerText = data.error || "حدث خطأ في التوقع.";
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,35 @@
+{
+  "start_date": "2025-03-28",
+  "weekly_progress": [
+    {
+      "week": 1,
+      "mean_absolute_error": 568000,
+      "accuracy_improvement": null
+    },
+    {
+      "week": 2,
+      "mean_absolute_error": 568000,
+      "accuracy_improvement": "0%"
+    },
+    {
+      "week": 3,
+      "mean_absolute_error": 33494539,
+      "accuracy_improvement": "-5797%"
+    },
+    {
+      "week": 4,
+      "mean_absolute_error": 33494539,
+      "accuracy_improvement": "0%"
+    },
+    {
+      "week": 5,
+      "mean_absolute_error": 33494539,
+      "accuracy_improvement": "0%"
+    },
+    {
+      "week": 6,
+      "mean_absolute_error": 33494539,
+      "accuracy_improvement": "0%"
+    }
+  ]
+}

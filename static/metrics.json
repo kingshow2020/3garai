@@ -1,0 +1,20 @@
+{
+  "start_date": "2025-03-28",
+  "weekly_progress": [
+    {
+      "week": 1,
+      "mean_absolute_error": null,
+      "accuracy_improvement": null
+    },
+    {
+      "week": 2,
+      "mean_absolute_error": 568000.0,
+      "accuracy_improvement": null
+    },
+    {
+      "week": 3,
+      "mean_absolute_error": 568000,
+      "accuracy_improvement": "0%"
+    }
+  ]
+}
